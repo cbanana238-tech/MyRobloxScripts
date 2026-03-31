@@ -1,30 +1,46 @@
--- سکرێپتێ گوهۆڕینا جەستەی (بۆ هندێ خەلک ببینن)
 local player = game.Players.LocalPlayer
-local char = player.Character
-if not char then return end
+local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
 
 -- دروستکرنا دوگمەیێ
 local screenGui = Instance.new("ScreenGui", player.PlayerGui)
 local button = Instance.new("TextButton", screenGui)
-button.Size = UDim2.new(0, 200, 0, 50)
-button.Position = UDim2.new(0.5, -100, 0.8, 0)
-button.Text = "گوهۆڕینا جەستەی (Server Side)"
-button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+button.Size = UDim2.new(0, 220, 0, 50)
+button.Position = UDim2.new(0.5, -110, 0.8, 0)
+button.Text = "Swap Body (R6/R15)"
+button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Font = Enum.Font.SourceSansBold
+button.TextSize = 20
+
+-- پاراستنا دوگمەیێ پشتی مرنێ
+screenGui.ResetOnSpawn = false
 
 button.MouseButton1Click:Connect(function()
-    -- ئەڤ بەشە هەوڵ ددەت Velocity و CFrame بکاربینیت دا خەلک ببینن
     local head = char:FindFirstChild("Head")
-    local rLeg = char:FindFirstChild("Right Leg") or char:FindFirstChild("RightUpperLeg")
-
-    if head and rLeg then
-        -- ل ڤێرە مە گوهۆڕین یا کری، بەلێ هندەک یاری ڕێگریێ لێ دکەن
-        head.CFrame = rLeg.CFrame * CFrame.new(0, 2, 0)
-        rLeg.CFrame = char.Head.CFrame
+    
+    if hum.RigType == Enum.HumanoidRigType.R6 then
+        -- ئەگەر R6 بوو
+        local torso = char:FindFirstChild("Torso")
+        local rLeg = char:FindFirstChild("Right Leg")
+        if head and torso and rLeg then
+            if torso:FindFirstChild("Neck") then torso.Neck.Part1 = rLeg end
+            if torso:FindFirstChild("Right Hip") then torso["Right Hip"].Part1 = head end
+            button.Text = "R6 Swapped!"
+        end
         
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "ئەنجام درا",
-            Text = "هەوڵدەدەین خەڵکیش ببینن!",
-            Duration = 3
-        })
+    elseif hum.RigType == Enum.HumanoidRigType.R15 then
+        -- ئەگەر R15 بوو
+        local rUpperLeg = char:FindFirstChild("RightUpperLeg")
+        if head and rUpperLeg then
+            -- ل R15 باشترین ڕێکا "Server Side" گوهۆڕینا Attachment-انە
+            local neck = head:FindFirstChild("Neck")
+            local hip = rUpperLeg:FindFirstChild("RightHip")
+            if neck and hip then
+                neck.Part1 = rUpperLeg
+                hip.Part1 = head
+                button.Text = "R15 Swapped!"
+            end
+        end
     end
 end)
