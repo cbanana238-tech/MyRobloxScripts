@@ -5,18 +5,17 @@ local screenGui = Instance.new("ScreenGui", player.PlayerGui)
 local button = Instance.new("TextButton", screenGui)
 button.Size = UDim2.new(0, 200, 0, 50)
 button.Position = UDim2.new(0.5, -100, 0.8, 0)
-button.Text = "Full Body Swap (Safe)"
-button.BackgroundColor3 = Color3.fromRGB(255, 100, 0) -- ڕەنگێ پڕتەقاڵی تۆخ
+button.Text = "Swap Body (Universal)"
+button.BackgroundColor3 = Color3.fromRGB(255, 165, 0) -- ڕەنگێ پڕتەقاڵی
 button.TextColor3 = Color3.new(1, 1, 1)
 
 button.MouseButton1Click:Connect(function()
-    -- گەڕیان ل دویف هەمی جۆینتێن سەر و قاچی (R6 & R15)
+    -- ئەڤە تەنێ تێک دەت و نامری
     for _, v in pairs(char:GetDescendants()) do
         if v:IsA("Motor6D") and (v.Name == "Neck" or v.Name == "RightHip" or v.Name == "Right Hip" or v.Name == "RightUpperLeg") then
-            -- ئەڤە جهێ وان تێک دەت بێی کو تو بمرێ
-            v.C0 = v.C0 * CFrame.new(0, -2.5, 0) 
+            v.C0 = v.C0 * CFrame.new(0, -2.5, 0)
             v.C1 = v.C1 * CFrame.new(0, 2.5, 0)
         end
     end
-    button.Text = "Full Swapped! ✅"
+    button.Text = "Done! (Swapped)"
 end)
