@@ -8,11 +8,10 @@ local SpeedInput = Instance.new("TextBox")
 local RadiusInput = Instance.new("TextBox")
 
 -- [ GUI Setup ]
-ScreenGui.Name = "EUFXN9_v3"
+ScreenGui.Name = "EUFXN9_Final"
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 
-MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.Position = UDim2.new(0.5, -125, 0.5, -135)
@@ -29,12 +28,11 @@ Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 15)
 
 NameInput.Parent = MainFrame
-NameInput.PlaceholderText = "Username یێ بەرامبەر..."
+NameInput.PlaceholderText = "2-3 پیتان بنڤیسە..."
 NameInput.Position = UDim2.new(0.1, 0, 0.2, 0)
 NameInput.Size = UDim2.new(0.8, 0, 0, 35)
 NameInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 NameInput.TextColor3 = Color3.new(1, 1, 1)
-NameInput.Text = ""
 Instance.new("UICorner", NameInput)
 
 SpeedInput.Parent = MainFrame
@@ -74,31 +72,36 @@ Instance.new("UICorner", StartBtn)
 local Orbiting = false
 local CurrentTarget = nil
 local Angle = 0
-local OrbitMode = 1 -- 1: Horizontal, 2: Vertical, 3: Face Spin
+local OrbitMode = 1 
 
 ModeBtn.MouseButton1Click:Connect(function()
     OrbitMode = OrbitMode + 1
     if OrbitMode > 3 then OrbitMode = 1 end
-    
-    if OrbitMode == 1 then
-        ModeBtn.Text = "Mode: Horizontal"
-    elseif OrbitMode == 2 then
-        ModeBtn.Text = "Mode: Vertical"
-    elseif OrbitMode == 3 then
-        ModeBtn.Text = "Mode: Face Spin (بەر چاڤێن وی)"
-    end
+    local modes = {"Horizontal", "Vertical", "Face Spin"}
+    ModeBtn.Text = "Mode: " .. modes[OrbitMode]
 end)
 
 StartBtn.MouseButton1Click:Connect(function()
     if not Orbiting then
-        local Target = game.Players:FindFirstChild(NameInput.Text)
-        if Target and Target.Character then
+        local InputText = NameInput.Text:lower()
+        local FoundTarget = nil
+        
+        -- سیستەمێ دیتنا ناڤی ب ٢ پیتان
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p.Name:lower():sub(1, #InputText) == InputText or p.DisplayName:lower():sub(1, #InputText) == InputText then
+                FoundTarget = p
+                break
+            end
+        end
+
+        if FoundTarget and FoundTarget.Character then
             Orbiting = true
-            CurrentTarget = Target
+            CurrentTarget = FoundTarget
+            NameInput.Text = FoundTarget.Name -- ناڤی تەمام دکەت
             StartBtn.Text = "STOP"
             StartBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
         else
-            StartBtn.Text = "ناڤ خەلەتە!"
+            StartBtn.Text = "ناڤ نەهاتە دیتن!"
             task.wait(1)
             StartBtn.Text = "دەستپێ بکە"
         end
@@ -116,7 +119,7 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
     if Orbiting and CurrentTarget and CurrentTarget.Character then
         local T_Head = CurrentTarget.Character:FindFirstChild("Head")
         local My_Char = game.Players.LocalPlayer.Character
-        local My_Root = My_Char:FindFirstChild("HumanoidRootPart")
+        local My_Root = My_Char and My_Char:FindFirstChild("HumanoidRootPart")
         
         if T_Head and My_Root then
             My_Char.Humanoid.PlatformStand = true
@@ -130,11 +133,8 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
                 My_Root.CFrame = CFrame.new(T_Head.Position + Vector3.new(math.cos(Angle)*r, 1, math.sin(Angle)*r), T_Head.Position)
             elseif OrbitMode == 2 then -- Vertical
                 My_Root.CFrame = CFrame.new(T_Head.Position + Vector3.new(0, math.cos(Angle)*r, math.sin(Angle)*r), T_Head.Position)
-            elseif OrbitMode == 3 then -- Face Spin (ئەو عەلەکێ تە دڤیا)
-                -- 1.5 مەتر ل پێش چاڤێن وی
-                local FacePos = T_Head.CFrame * CFrame.new(0, 0, -1.5)
-                -- سۆڕان ل سەر تەوەرا Z دا وەک پەنکەکێ بسۆریت
-                My_Root.CFrame = FacePos * CFrame.Angles(0, 0, Angle)
+            elseif OrbitMode == 3 then -- Face Spin
+                My_Root.CFrame = (T_Head.CFrame * CFrame.new(0, 0, -1.5)) * CFrame.Angles(0, 0, Angle)
             end
         end
     end
